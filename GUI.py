@@ -1,35 +1,15 @@
-import kivy
-kivy.require('1.11.1')
-
-from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
-
 from kivy.uix.button import Button
 from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
 from kivy.uix.image import Image
 from kivy.uix.popup import Popup
-
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.scrollview import ScrollView
 from kivy.uix.anchorlayout import AnchorLayout
-
-
-import matplotlib.pyplot as plt
+from kivy.graphics import Color, Rectangle
+from kivy.app import App
 import os
-import redes.T1_Redes.functions as functions  
-
-
-def plotar(tempo, sinal, titulo=""):
-    plt.figure(figsize=(10, 3))
-    plt.title(titulo)
-    plt.plot(tempo, sinal, drawstyle='steps-post')
-    plt.ylim(-2, 2)
-    plt.grid(True)
-    plt.tight_layout()
-    plt.savefig("grafico.png")
-    plt.close()
 
 
 class TelaMenuInicial(Screen):
@@ -37,33 +17,29 @@ class TelaMenuInicial(Screen):
         super().__init__(**kwargs)
         layout = FloatLayout()
 
-        btn_gerar = Button(text="Gerar Gráficos", size_hint=(0.4, 0.2), pos_hint={"center_x": 0.5, "center_y": 0.6})
+        self.graficos = []  # Lista para armazenar os gráficos gerados
+        self.indice_atual = 0  # Índice atual do gráfico exibido
+
+
+        btn_gerar = Button(text="Gráficos de Rede", size_hint=(0.4, 0.2), pos_hint={"center_x": 0.5, "center_y": 0.6})
         btn_gerar.bind(on_press=self.ir_para_entrada)
         layout.add_widget(btn_gerar)
 
-        btn_sobre = Button(text="Sobre os Códigos de Linha", size_hint=(0.4, 0.2), pos_hint={"center_x": 0.5, "center_y": 0.3})
+        btn_sobre = Button(text="Sobre", size_hint=(0.4, 0.2), pos_hint={"center_x": 0.5, "center_y": 0.3})
         btn_sobre.bind(on_press=self.abrir_popup_sobre)
         layout.add_widget(btn_sobre)
 
         self.add_widget(layout)
 
-    def ir_para_entrada(self, *args):
-        self.manager.current = "entrada_bits"
 
+    def ir_para_entrada(self, *args):
+        self.manager.current = "Graficos Basicos"
 
     def abrir_popup_sobre(self, *args):
-        texto = (
-            "Este trabalho implementa esquemas de codificação de linha como NRZ-L, NRZ-I, AMI, "
-            "Pseudoternário, Manchester e Manchester Diferencial. São técnicas utilizadas em comunicação digital "
-            "para transformar bits em sinais físicos transmitíveis.\n\n"
-            "Esses métodos ajudam a garantir sincronização entre transmissor e receptor, reduzir o consumo de energia, "
-            "e permitir a detecção de erros. Cada técnica possui características distintas e é adequada para diferentes cenários."
-        )
+        texto = "Trabalho de Redes de Computadores\n"
 
         # Layout principal com padding
         content = BoxLayout(orientation='vertical', padding=10, spacing=10)
-
-        # Botão X de fechar (alinhado à direita)
         fechar_layout = AnchorLayout(anchor_x='right', anchor_y='top', size_hint=(1, None), height=40)
         btn_fechar = Button(text='X', size_hint=(None, None), size=(40, 40))
         fechar_layout.add_widget(btn_fechar)
@@ -78,103 +54,165 @@ class TelaMenuInicial(Screen):
             valign='top',
             font_size='16sp',
             text_size=(660, None),  
-            padding=(20, 10)        # padding nas laterais e topo/baixo
+            padding=(20, 10)
         )
         label.bind(texture_size=lambda instance, value: setattr(label, 'height', value[1]))
         scroll.add_widget(label)
-
         content.add_widget(scroll)
 
         # Popup
-        popup = Popup(title="Sobre os Códigos de Linha",
+        popup = Popup(title="Sobre o Trabalho",
                     content=content,
                     size_hint=(0.9, 0.7),
                     auto_dismiss=False)
 
-        # Botão fecha o popup
         btn_fechar.bind(on_release=popup.dismiss)
         popup.open()
 
 
-class TelaEntradaBits(Screen):
+class TelaGraficosBasicos(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.indice_codificacao = 0
-        self.layout = FloatLayout()
 
-        self.entrada = TextInput(hint_text="Digite a sequência binária", multiline=False,
-                                 size_hint=(0.8, 0.15), pos_hint={"center_x": 0.5, "center_y": 0.7})
-        self.layout.add_widget(self.entrada)
+        # Define os gráficos em listas separadas para cada tipo
+        self.graficos_barras = [
+            ("img/barras/protocolos.png", "Frequência de Protocolos"),
+            ("img/barras/ip_origem.png", "Top IPs de Origem"),
+            ("img/barras/ip_destino.png", "Top IPs de Destino")
+        ]
+        self.graficos_histograma = [
+            ("img/histograms/tamanhos.png", "Distribuição dos Tamanhos dos Pacotes")
+        ]
+        self.graficos_pizza = [
+            ("img/pizza/protocolos_pizza.png", "Proporção de Protocolos"),
+            ("img/pizza/ip_origem_pizza.png", "Proporção dos Principais IPs de Origem"),
+            ("img/pizza/ip_destino_pizza.png", "Proporção dos Principais IPs de Destino")
+        ]
 
-        self.label_codificacao = Label(text=functions.codificacoes[self.indice_codificacao],
-                                       size_hint=(0.8, 0.1), pos_hint={"center_x": 0.5, "center_y": 0.4}) #AHAHA
-        self.layout.add_widget(self.label_codificacao)
+        # Inicializa a lista atual com uma lista vazia (será atribuída conforme o botão)
+        self.graficos_atual = []
+        self.indice_atual = 0  # Índice do gráfico atual
 
-        btn_ok = Button(text="OK", size_hint=(0.2, 0.15), pos_hint={"center_x": 0.5, "center_y": 0.5})
-        btn_ok.bind(on_press=self.gerar_grafico)
-        self.layout.add_widget(btn_ok)
+        layout_principal = BoxLayout(orientation='horizontal')
 
-        btn_anterior = Button(text="Anterior", size_hint=(0.2, 0.15), pos_hint={"center_x": 0.25, "center_y": 0.5})
-        btn_anterior.bind(on_press=self.codificacao_anterior)
-        self.layout.add_widget(btn_anterior)
+        # Barra lateral (25% da tela)
+        barra_lateral = BoxLayout(orientation='vertical', size_hint=(0.25, 1), spacing=10, padding=10)
 
-        btn_proximo = Button(text="Próximo", size_hint=(0.2, 0.15), pos_hint={"center_x": 0.75, "center_y": 0.5})
-        btn_proximo.bind(on_press=self.codificacao_proxima)
-        self.layout.add_widget(btn_proximo)
+        label = Label(text="Tipos de Gráfico", size_hint=(1, 0.1))
+        barra_lateral.add_widget(label)
 
-        btn_voltar = Button(text="Voltar", size_hint=(0.2, 0.1), pos_hint={"x": 0.02, "top": 0.98})
-        btn_voltar.bind(on_press=self.voltar)
-        self.layout.add_widget(btn_voltar)
+        # Botões para alternar a exibição dos gráficos
+        btn_barra = Button(text="Gráfico de Barra", size_hint=(1, 0.1))
+        btn_barra.bind(on_press=self.alternar_grafico)
+        barra_lateral.add_widget(btn_barra)
 
-        self.imagem = Image(size_hint=(0.9, 0.35), pos_hint={"center_x": 0.5, "y": 0.02})
-        self.layout.add_widget(self.imagem)
+        btn_histograma = Button(text="Histograma", size_hint=(1, 0.1))
+        btn_histograma.bind(on_press=self.alternar_grafico)
+        barra_lateral.add_widget(btn_histograma)
 
-        self.add_widget(self.layout)
+        btn_pizza = Button(text="Gráfico de Pizza", size_hint=(1, 0.1))
+        btn_pizza.bind(on_press=self.alternar_grafico)
+        barra_lateral.add_widget(btn_pizza)
 
-    def gerar_grafico(self, *args):
-        bits = self.entrada.text.strip()
-        if not all(b in '01' for b in bits):
-            popup = Popup(title="Erro", content=Label(text="Digite apenas 0 e 1."),
-                          size_hint=(0.6, 0.3))
-            popup.open()
-            return
+        # Botão de voltar
+        btn_voltar = Button(text="Voltar", size_hint=(1, 0.1))
+        btn_voltar.bind(on_press=self.voltar_menu)
+        barra_lateral.add_widget(btn_voltar)
 
-        nome_codificacao = functions.codificacoes[self.indice_codificacao]
-        funcao = functions.funcoes_codificacao[nome_codificacao]
+        layout_principal.add_widget(barra_lateral)
 
-        tempo, sinal = funcao(bits)
-        plotar(tempo, sinal, titulo=f"{nome_codificacao} para bits: {bits}")
+        # Área central (75% da tela) para o gráfico e explicação
+        self.area_grafico = BoxLayout(orientation='vertical', size_hint=(0.75, 1), padding=20, spacing=10)
 
-        if os.path.exists("grafico.png"):
-            self.imagem.source = "grafico.png"
-            self.imagem.reload()
+        # Fundo branco (ajustando para ocupar até 80% da altura)
+        self.fundo_branco = FloatLayout(size_hint=(1.0, 0.8))
+        with self.fundo_branco.canvas.before:
+            Color(1, 1, 1, 1)  # cor do fundo branco
+            self.fundo_rect = Rectangle(pos=self.fundo_branco.pos, size=self.fundo_branco.size)
+            self.fundo_branco.bind(pos=self._update_fundo, size=self._update_fundo)
 
-    def codificacao_anterior(self, *args):
-        self.indice_codificacao = (self.indice_codificacao - 1) % len(functions.codificacoes)
-        self.label_codificacao.text = functions.codificacoes[self.indice_codificacao]
-        
-        if self.entrada.text.strip():
-            self.gerar_grafico()
+        # A imagem ocupa 80% do fundo branco e fica centralizada
+        self.imagem = Image(
+            size_hint=(0.8, 0.8),
+            pos_hint={"center_x": 0.5, "center_y": 0.5},
+            allow_stretch=True,
+            keep_ratio=True
+        )
+        self.fundo_branco.add_widget(self.imagem)
 
-    def codificacao_proxima(self, *args):
-        self.indice_codificacao = (self.indice_codificacao + 1) % len(functions.codificacoes)
-        self.label_codificacao.text = functions.codificacoes[self.indice_codificacao]
-        
-        if self.entrada.text.strip():
-            self.gerar_grafico()
+        # Adicionar o fundo branco à área de gráficos
+        self.area_grafico.add_widget(self.fundo_branco)
+
+        # Label explicativo
+        self.label_explicativo = Label(
+            text="Legenda do gráfico aparecerá aqui",
+            size_hint=(1, 0.1),
+            halign='center'
+        )
+        self.area_grafico.add_widget(self.label_explicativo)
+
+        # Botões de navegação
+        box_nav = BoxLayout(size_hint=(1, 0.1), spacing=20, padding=(40, 0))
+        btn_anterior = Button(text="Anterior")
+        btn_proximo = Button(text="Próximo")
+        btn_anterior.bind(on_press=self.anterior_grafico)
+        btn_proximo.bind(on_press=self.proximo_grafico)
+        box_nav.add_widget(btn_anterior)
+        box_nav.add_widget(btn_proximo)
+        self.area_grafico.add_widget(box_nav)
+
+        layout_principal.add_widget(self.area_grafico)
+        self.add_widget(layout_principal)
+
+    def alternar_grafico(self, instance):
+        # Dependendo do botão clicado, altera a lista de gráficos atual
+        if instance.text == "Gráfico de Barra":
+            self.graficos_atual = self.graficos_barras
+        elif instance.text == "Histograma":
+            self.graficos_atual = self.graficos_histograma
+        elif instance.text == "Gráfico de Pizza":
+            self.graficos_atual = self.graficos_pizza
+
+        self.indice_atual = 0  # Reseta o índice ao selecionar um novo tipo de gráfico
+        self.atualizar_imagem()
+
+    def atualizar_imagem(self):
+        if self.graficos_atual:  # Verifica se há gráficos na lista atual
+            caminho_imagem, legenda = self.graficos_atual[self.indice_atual]
+            if os.path.exists(caminho_imagem):
+                self.imagem.source = caminho_imagem
+                self.imagem.reload()
+            self.label_explicativo.text = legenda
+
+    def anterior_grafico(self, *args):
+        if self.indice_atual > 0:
+            self.indice_atual -= 1
+            self.atualizar_imagem()
+
+    def proximo_grafico(self, *args):
+        if self.indice_atual < len(self.graficos_atual) - 1:
+            self.indice_atual += 1
+            self.atualizar_imagem()
+
+    def voltar_menu(self, *args):
+        self.manager.current = "Menu Inicial"
+
+    def _update_fundo(self, instance, value):
+        self.fundo_rect.pos = instance.pos
+        self.fundo_rect.size = instance.size
 
 
-    def voltar(self, *args):
-        self.manager.current = "menu_inicial"
+class GerenciadorTelas(ScreenManager):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.add_widget(TelaMenuInicial(name="Menu Inicial"))
+        self.add_widget(TelaGraficosBasicos(name="Graficos Basicos"))
 
 
-class LineCodeApp(App):
+class NetGraphicsApp(App):
     def build(self):
-        sm = ScreenManager()
-        sm.add_widget(TelaMenuInicial(name="menu_inicial"))
-        sm.add_widget(TelaEntradaBits(name="entrada_bits"))
-        return sm
+        return GerenciadorTelas()
 
 
-if __name__ == '__main__':
-    LineCodeApp().run()
+if __name__ == "__main__":
+    NetGraphicsApp().run()

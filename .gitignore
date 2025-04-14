@@ -1,0 +1,19 @@
+
+__pycache__
+*.bin
+# Ignorar arquivos binários
+*.bin
+*.exe
+*.o
+*.out
+*.a
+*.so
+*.dll
+*.dylib
+*.class
+*.log
+*.exe
+*.o
+*.out
+extrator
+extrato_mt
