@@ -44,7 +44,7 @@ class TelaMenuInicial(Screen):
 
     def abrir_popup_sobre(self, *args):
         texto1 = (
-            "Trabalho 1 Rede de Computadores.\n\n"
+            "Trabalho 1 Redes de Computadores.\n\n"
             "Este programa tem como objetivo analisar e gerar gráficos a partir de arquivos de captura de pacotes de IP.\n\n"
         )
 
@@ -104,24 +104,38 @@ class TelaAnalise(Screen):
 
         # Define os gráficos em listas separadas para cada tipo
         self.graficos_barras = [
-            ("img/barras/protocolos.png", "Frequência de Protocolos"),
-            ("img/barras/ip_origem.png", "Top IPs de Origem"),
-            ("img/barras/ip_destino.png", "Top IPs de Destino")
+            ("img/barras/horizontal_scan.png", "Frequência de Protocolos"),
+            ("img/barras/protocolos_por_ip.png", "Top IPs de Origem"),
+            ("img/barras/skew_kurt_ipg.png", "Top IPs de Destino"),
+            ("img/barras/ip_atividade.png", "Atividade por IP")
         ]
-        self.graficos_histograma = [
-            ("img/histograms/tamanhos.png", "Distribuição dos Tamanhos dos Pacotes")
-        ]
-        self.graficos_pizza = [
-            ("img/pizza/protocolos_pizza.png", "Proporção de Protocolos"),
-            ("img/pizza/ip_origem_pizza.png", "Proporção dos Principais IPs de Origem"),
-            ("img/pizza/ip_destino_pizza.png", "Proporção dos Principais IPs de Destino")
-        ]
-        self.graficos_heatmap = [
-            ("img/heatmap/correlacao.png", "Mapa de Calor de Protocolos")
 
+        self.grafico_boxplot = [
+            ("img/boxplot/boxplot.png", "Boxplot de Tamanhos")
         ]
+
+        self.grafico_violin = [
+            ("img/violin/violin.png", "Violin Plot de Tamanhos")
+        ]
+
+        self.grafico_cdf = [
+            ("img/cdf/cdf.png", "CDF de Tamanhos")
+        ]
+
+        self.graficos_heatmap = [
+            ("img/heatmap/correlacao.png", "Mapa de Calor de Protocolos"),
+            ("img/heatmap/entropia.png", "Entropia de IPs de Origem"),
+            ("img/heatmap/entropia_destino.png", "Entropia de IPs de Destino")
+        ]
+
         self.graficos_tempo = [
-            ("img/tempo/pacotes_tempo.png", "Pacotes por Tempo")
+            ("img/tempo/pacotes_tempo.png", "Pacotes por Tempo"),
+            ("img/tempo/ipg.png", "Inter Packet Gap (IPG)"),
+            ("img/tempo/ipg_por_ip.png", "IPG por IP"),
+            ("img/tempo/ipg_por_tempo.png", "IPG por Tempo"),
+            ("img/tempo/entropia_temporal.png", "Entropia Temporal"),
+            ("img/tempo/anomalias_temporais.png", "Anomalias Temporais"),
+            ("img/tempo/scatter.png", "Gráfico Temporal Avançado")
         ]
 
         # Inicializa a lista atual com uma lista vazia (será atribuída conforme o botão)
@@ -141,14 +155,6 @@ class TelaAnalise(Screen):
         btn_barra.bind(on_press=self.alternar_grafico)
         barra_lateral.add_widget(btn_barra)
 
-        btn_histograma = Button(text="Histograma", size_hint=(1, 0.1))
-        btn_histograma.bind(on_press=self.alternar_grafico)
-        barra_lateral.add_widget(btn_histograma)
-
-        btn_pizza = Button(text="Gráfico de Pizza", size_hint=(1, 0.1))
-        btn_pizza.bind(on_press=self.alternar_grafico)
-        barra_lateral.add_widget(btn_pizza)
-
         btn_heatmap = Button(text="Mapa de Calor", size_hint=(1, 0.1))
         btn_heatmap.bind(on_press=self.alternar_grafico)
         barra_lateral.add_widget(btn_heatmap)
@@ -156,6 +162,19 @@ class TelaAnalise(Screen):
         btn_tempo = Button(text="Gráfico Temporal", size_hint=(1, 0.1))
         btn_tempo.bind(on_press=self.alternar_grafico)
         barra_lateral.add_widget(btn_tempo)
+
+        btn_boxplot = Button(text="Boxplot", size_hint=(1, 0.1))
+        btn_boxplot.bind(on_press=self.alternar_grafico)
+        barra_lateral.add_widget(btn_boxplot)
+
+        btn_violin = Button(text="Violin Plot", size_hint=(1, 0.1))
+        btn_violin.bind(on_press=self.alternar_grafico)
+        barra_lateral.add_widget(btn_violin)
+
+        btn_cdf = Button(text="CDF", size_hint=(1, 0.1))
+        btn_cdf.bind(on_press=self.alternar_grafico)
+        barra_lateral.add_widget(btn_cdf)
+
 
         # Botão de voltar
         btn_voltar = Button(text="Voltar", size_hint=(1, 0.1))
@@ -208,13 +227,24 @@ class TelaAnalise(Screen):
         self.add_widget(layout_principal)
 
     def alternar_grafico(self, instance):
-        # Dependendo do botão clicado, altera a lista de gráficos atual
         if instance.text == "Gráfico de Barra":
             self.graficos_atual = self.graficos_barras
-        elif instance.text == "Histograma":
-            self.graficos_atual = self.graficos_histograma
-        elif instance.text == "Gráfico de Pizza":
-            self.graficos_atual = self.graficos_pizza
+        elif instance.text == "Boxplot":
+            self.graficos_atual = self.grafico_boxplot
+        elif instance.text == "Violin Plot":
+            self.graficos_atual = self.grafico_violin
+        elif instance.text == "CDF":
+            self.graficos_atual = self.grafico_cdf
+        elif instance.text == "Mapa de Calor":
+            self.graficos_atual = self.graficos_heatmap
+        elif instance.text == "Gráfico Temporal":
+            self.graficos_atual = self.graficos_tempo
+        else:
+            self.graficos_atual = []
+
+        self.indice_atual = 0
+        self.atualizar_imagem()
+
 
         self.indice_atual = 0  # Reseta o índice ao selecionar um novo tipo de gráfico
         self.atualizar_imagem()
@@ -254,18 +284,21 @@ class TelaGraficosBasicos(Screen):
             ("img/barras/ip_origem.png", "Top IPs de Origem"),
             ("img/barras/ip_destino.png", "Top IPs de Destino")
         ]
-        self.graficos_histograma = [
-            ("img/histograms/tamanhos.png", "Distribuição dos Tamanhos dos Pacotes")
-        ]
+
         self.graficos_pizza = [
             ("img/pizza/protocolos_pizza.png", "Proporção de Protocolos"),
             ("img/pizza/ip_origem_pizza.png", "Proporção dos Principais IPs de Origem"),
             ("img/pizza/ip_destino_pizza.png", "Proporção dos Principais IPs de Destino")
         ]
+
+        self.graficos_histograma = [
+            ("img/histograms/tamanhos.png", "Distribuição dos Tamanhos dos Pacotes")
+        ]
+
         self.graficos_heatmap = [
             ("img/heatmap/correlacao.png", "Mapa de Calor de Protocolos")
-
         ]
+
         self.graficos_tempo = [
             ("img/tempo/pacotes_tempo.png", "Pacotes por Tempo")
         ]
@@ -354,16 +387,22 @@ class TelaGraficosBasicos(Screen):
         self.add_widget(layout_principal)
 
     def alternar_grafico(self, instance):
-        # Dependendo do botão clicado, altera a lista de gráficos atual
         if instance.text == "Gráfico de Barra":
             self.graficos_atual = self.graficos_barras
         elif instance.text == "Histograma":
             self.graficos_atual = self.graficos_histograma
         elif instance.text == "Gráfico de Pizza":
             self.graficos_atual = self.graficos_pizza
+        elif instance.text == "Gráfico Temporal":
+            self.graficos_atual = self.graficos_tempo
+        elif instance.text == "Mapa de Calor":
+            self.graficos_atual = self.graficos_heatmap
+        else:
+            self.graficos_atual = []
 
         self.indice_atual = 0  # Reseta o índice ao selecionar um novo tipo de gráfico
         self.atualizar_imagem()
+
 
     def atualizar_imagem(self):
         if self.graficos_atual:  # Verifica se há gráficos na lista atual
