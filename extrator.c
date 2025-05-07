@@ -3,15 +3,15 @@
 // como usar
 // editcap -c 100000 original.pcap batches/parte.pcap     -> divide o arquivo original em partes de 100.000 pacotes e salva na pasta batches
 // gcc extrator.c -lpcap -lpthread -o extrator  -> compilar
-// ./extrator batches/parte_000*.pcap   -> rodar para todas as partes
+// ./extrator batches/parte_00*.pcap   -> rodar para todas as partes
 
 
 
-#include <pcap.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <pcap.h>
 #include <netinet/ip.h>
 #include <arpa/inet.h>
 
