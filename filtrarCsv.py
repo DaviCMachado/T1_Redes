@@ -39,11 +39,13 @@ def pegar_x_linhas(caminho_entrada, caminho_saida, n_topo=200_000, n_base=200_00
     df_topo = pd.read_csv(caminho_entrada, nrows=n_topo)
     
     # Conta total de linhas do arquivo para calcular onde começa o trecho final
-    total_linhas = sum(1 for _ in open(caminho_entrada)) - 1  # -1 para o cabeçalho
+   # # total_linhas = sum(1 for _ in open(caminho_entrada)) - 1  # -1 para o cabeçalho
 
     # Lê as últimas n_base linhas (usando skiprows)
-    skip_linhas = total_linhas - n_base
-    df_base = pd.read_csv(caminho_entrada, skiprows=range(1, skip_linhas + 1))  # pula linhas, mas mantém o cabeçalho
+    # skip_linhas = total_linhas - n_base
+    # df_base = pd.read_csv(caminho_entrada, skiprows=range(1, skip_linhas + 1))  # pula linhas, mas mantém o cabeçalho
+
+    df_base = df_topo.copy()
 
     # Concatena os dois pedaços
     df_resultado = pd.concat([df_topo, df_base], ignore_index=True)
@@ -60,7 +62,7 @@ caminho_filtrado = "data_limpo.csv"
 caminho_saida = "data_300k.csv"
 
 # Filtrar o CSV original
-limpar_csv_arquivo(caminho_entrada, caminho_filtrado)
+# limpar_csv_arquivo(caminho_entrada, caminho_filtrado)
 
 # Pegar as 300k linhas do arquivo filtrado
 pegar_x_linhas(caminho_filtrado, caminho_saida)

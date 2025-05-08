@@ -18,3 +18,5 @@ __pycache__
 extrator
 extrato_mt
 batches
+data_limpo.csv
+data_300k.csv
