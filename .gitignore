@@ -19,4 +19,5 @@ extrator
 extrato_mt
 batches
 data_limpo.csv
+data_limpo_filtrado.csv
 data_300k.csv

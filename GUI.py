@@ -104,38 +104,23 @@ class TelaAnalise(Screen):
 
         # Define os gráficos em listas separadas para cada tipo
         self.graficos_barras = [
-            ("img/barras/horizontal_scan.png", "Frequência de Protocolos"),
-            ("img/barras/protocolos_por_ip.png", "Top IPs de Origem"),
-            ("img/barras/skew_kurt_ipg.png", "Top IPs de Destino"),
+            ("img/barras/bursts_por_ip.png", "Bursts por IP"),
+            ("img/barras/ip_origem.png", "Top IPs de Origem"),
+            ("img/barras/ip_destino.png", "Top IPs de Destino"),
             ("img/barras/ip_atividade.png", "Atividade por IP")
         ]
 
-        self.grafico_boxplot = [
-            ("img/boxplot/boxplot.png", "Boxplot de Tamanhos")
-        ]
-
-        self.grafico_violin = [
-            ("img/violin/violin.png", "Violin Plot de Tamanhos")
-        ]
-
-        self.grafico_cdf = [
-            ("img/cdf/cdf.png", "CDF de Tamanhos")
-        ]
-
         self.graficos_heatmap = [
-            ("img/heatmap/correlacao.png", "Mapa de Calor de Protocolos"),
-            ("img/heatmap/entropia.png", "Entropia de IPs de Origem"),
-            ("img/heatmap/entropia_destino.png", "Entropia de IPs de Destino")
+            ("img/heatmap/ips_ativos_tempo.png", "Mapa de Calor de IPs Ativos")
         ]
 
         self.graficos_tempo = [
             ("img/tempo/pacotes_tempo.png", "Pacotes por Tempo"),
-            ("img/tempo/ipg.png", "Inter Packet Gap (IPG)"),
-            ("img/tempo/ipg_por_ip.png", "IPG por IP"),
-            ("img/tempo/ipg_por_tempo.png", "IPG por Tempo"),
-            ("img/tempo/entropia_temporal.png", "Entropia Temporal"),
-            ("img/tempo/anomalias_temporais.png", "Anomalias Temporais"),
-            ("img/tempo/scatter.png", "Gráfico Temporal Avançado")
+            ("img/tempo/trafego_agregado_tempo.png", "Tráfego Agregado por Tempo")
+        ]
+
+        self.graficos_scatter = [
+            ("img/scatter/tamanho_frequencia.png", "Scatter Tamanho vs Frequência")
         ]
 
         # Inicializa a lista atual com uma lista vazia (será atribuída conforme o botão)
@@ -163,17 +148,9 @@ class TelaAnalise(Screen):
         btn_tempo.bind(on_press=self.alternar_grafico)
         barra_lateral.add_widget(btn_tempo)
 
-        btn_boxplot = Button(text="Boxplot", size_hint=(1, 0.1))
-        btn_boxplot.bind(on_press=self.alternar_grafico)
-        barra_lateral.add_widget(btn_boxplot)
-
-        btn_violin = Button(text="Violin Plot", size_hint=(1, 0.1))
-        btn_violin.bind(on_press=self.alternar_grafico)
-        barra_lateral.add_widget(btn_violin)
-
-        btn_cdf = Button(text="CDF", size_hint=(1, 0.1))
-        btn_cdf.bind(on_press=self.alternar_grafico)
-        barra_lateral.add_widget(btn_cdf)
+        btn_scatter = Button(text="Scatter", size_hint=(1, 0.1))
+        btn_scatter.bind(on_press=self.alternar_grafico)
+        barra_lateral.add_widget(btn_scatter)
 
 
         # Botão de voltar
@@ -239,6 +216,8 @@ class TelaAnalise(Screen):
             self.graficos_atual = self.graficos_heatmap
         elif instance.text == "Gráfico Temporal":
             self.graficos_atual = self.graficos_tempo
+        elif instance.text == "Scatter":
+            self.graficos_atual = self.graficos_scatter
         else:
             self.graficos_atual = []
 
@@ -282,7 +261,10 @@ class TelaGraficosBasicos(Screen):
         self.graficos_barras = [
             ("img/barras/protocolos.png", "Frequência de Protocolos"),
             ("img/barras/ip_origem.png", "Top IPs de Origem"),
-            ("img/barras/ip_destino.png", "Top IPs de Destino")
+            ("img/barras/ip_destino.png", "Top IPs de Destino"),
+            ("img/barras/top_10_horizon_scan.png", "IPs com Mais Destinos (Scan)"),
+            ("img/barras/top_10_tamanhos_medios_por_ip.png", "IPs com Maior     Tamanho Médio de Pacotes"),
+            ('img/barras/volume_bytes_por_ip.png')
         ]
 
         self.graficos_pizza = [
