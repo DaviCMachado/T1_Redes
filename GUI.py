@@ -21,15 +21,15 @@ class TelaMenuInicial(Screen):
         self.indice_atual = 0  # Índice atual do gráfico exibido
 
 
-        btn_gerar = Button(text="Gráficos de Rede", size_hint=(0.4, 0.2), pos_hint={"center_x": 0.5, "center_y": 0.75})
-        btn_gerar.bind(on_press=self.ir_para_entrada)
-        layout.add_widget(btn_gerar)
+        # btn_gerar = Button(text="Gráficos de Rede", size_hint=(0.4, 0.2), pos_hint={"center_x": 0.5, "center_y": 0.75})
+        # btn_gerar.bind(on_press=self.ir_para_entrada)
+        # layout.add_widget(btn_gerar)
 
-        btn_stats = Button(text="Análise Estatística", size_hint=(0.4, 0.2), pos_hint={"center_x": 0.5, "center_y": 0.5})
+        btn_stats = Button(text="Análise Estatística", size_hint=(0.4, 0.2), pos_hint={"center_x": 0.5, "center_y": 0.6})
         btn_stats.bind(on_press=self.ir_para_analise)
         layout.add_widget(btn_stats)
 
-        btn_sobre = Button(text="Sobre", size_hint=(0.4, 0.2), pos_hint={"center_x": 0.5, "center_y": 0.25})
+        btn_sobre = Button(text="Sobre", size_hint=(0.4, 0.2), pos_hint={"center_x": 0.5, "center_y": 0.3})
         btn_sobre.bind(on_press=self.abrir_popup_sobre)
         layout.add_widget(btn_sobre)
 
@@ -49,7 +49,7 @@ class TelaMenuInicial(Screen):
         )
 
         texto2 = (
-            "Feito com amor por:\n\nDavi de Castro Machado\nGiovana Borelli\nJoão Pedro Righi\nLaura Boemo"
+            "Feito por:\n\nDavi de Castro Machado\nGiovana Borelli\nJoão Pedro Righi\nLaura Boemo"
         )
 
         # Layout principal com padding
@@ -104,10 +104,14 @@ class TelaAnalise(Screen):
 
         # Define os gráficos em listas separadas para cada tipo
         self.graficos_barras = [
-            ("img/barras/bursts_por_ip.png", "Bursts por IP"),
-            ("img/barras/ip_origem.png", "Top IPs de Origem"),
+            # ("img/barras/bursts_por_ip.png", "Bursts por IP"),
+           
+            ("img/barras/top_ips_origem.png", "Top IPs de Origem"),
             ("img/barras/ip_destino.png", "Top IPs de Destino"),
-            ("img/barras/ip_atividade.png", "Atividade por IP")
+            # ("img/barras/ip_destino.png", "Top IPG por IP"),
+            ("img/barras/top_10_horizon_scan.png", "IPs com Mais Destinos (Horizontal Scan)"),
+            ("img/barras/top_10_tamanhos_medios_por_ip.png", "IPs com Maior Tamanho Médio de Pacotes"),
+            ('img/barras/volume_bytes_por_ip.png', "Volume de Bytes por IP"),
         ]
 
         self.graficos_heatmap = [
@@ -260,7 +264,7 @@ class TelaGraficosBasicos(Screen):
         # Define os gráficos em listas separadas para cada tipo
         self.graficos_barras = [
             ("img/barras/protocolos.png", "Frequência de Protocolos"),
-            ("img/barras/ip_origem.png", "Top IPs de Origem"),
+            ("img/barras/top_ips_origem.png", "Top IPs de Origem"),
             ("img/barras/ip_destino.png", "Top IPs de Destino"),
             ("img/barras/top_10_horizon_scan.png", "IPs com Mais Destinos (Scan)"),
             ("img/barras/top_10_tamanhos_medios_por_ip.png", "IPs com Maior     Tamanho Médio de Pacotes"),
